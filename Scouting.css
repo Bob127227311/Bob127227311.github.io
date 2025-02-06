@@ -114,4 +114,8 @@ button:hover {
     button {
         width: 100%; /* Ensure buttons are full width on mobile */
     }
+
+    #qrcode svg {
+        width: 90%; /* Ensure QR code fits mobile screens */
+    }
 }

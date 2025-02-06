@@ -1,34 +1,30 @@
-const CACHE_NAME = 'v1'; //update version every change
+const CACHE_NAME = 'v2'; // Updated version
 const CACHE_ASSETS = [
-  '/', //files
+  '/', 
   '/index.html',
   '/Scouting.css',
   '/Scouting.js',
-  'https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js' // External librarys
+  'https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js' // External library
 ];
 
-// Install event
+// Install event - caching files
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Caching files');
         return cache.addAll(CACHE_ASSETS);
       })
       .then(() => self.skipWaiting())
   );
 });
 
-// Activate event
+// Activate event - removing old cache
 self.addEventListener('activate', event => {
-  console.log('Service Worker Activated');
-  // Remove old caches if any
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cache => {
           if (cache !== CACHE_NAME) {
-            console.log('Clearing old cache');
             return caches.delete(cache);
           }
         })
@@ -38,9 +34,11 @@ self.addEventListener('activate', event => {
   return self.clients.claim();
 });
 
-// Fetch event
+// Fetch event - serve from cache if offline
 self.addEventListener('fetch', event => {
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request).catch(() => caches.match('/index.html'));
+    })
   );
 });
